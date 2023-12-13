@@ -3,6 +3,19 @@ import os
 import json
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, confusion_matrix
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+
+
 
 filename = "obstacle/data6.json"
 filename2 = "normal/data6.json"
@@ -58,11 +71,35 @@ for folder in folders:
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
 
-        print(f'{folder}/{filename}')
         data = recuperer_de_json(f'{folder}/{filename}')
         df.loc[i] = histogramme(data, folder)
         i += 1
 
-print(df)
+
+ 
+df["Label"] = df["Label"].astype(int)
+
+
+X = df.drop("Label", axis=1).values
+y = df["Label"].values
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+
+## Entraîner un modèle (exemple avec une forêt aléatoire)
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+
+
+
+
+
+data = histogramme(recuperer_de_json("human/test1.json"), "normal" )[:-1]
+num_features = 19  # Replace with the correct number of features
+X_new = np.reshape(data, (1, num_features))
+
+
+print(model.predict(X_new))
 
 
